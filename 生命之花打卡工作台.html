@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生命之花 · 打卡工作台</title>
+<style>
+  :root{
+    --c-purple:#7F77DD; --c-purple-50:#EEEDFE; --c-purple-800:#3C3489;
+    --c-teal:#1D9E75; --c-teal-50:#E1F5EE; --c-teal-800:#085041;
+    --c-gray-50:#F1EFE8; --c-gray-100:#E6E4DC; --c-gray-400:#888780; --c-gray-600:#5F5E5A; --c-gray-800:#444441;
+    --bg:#FAFAF8; --card:#FFFFFF; --border:#E6E4DC;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--c-gray-800);font-size:14px;line-height:1.6;}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 64px;}
+  header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;}
+  h1{font-size:20px;margin:0;font-weight:600;color:var(--c-gray-800);}
+  .date{color:var(--c-gray-400);font-size:13px;margin-top:2px;}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;}
+  button{font-family:inherit;font-size:13px;border:1px solid var(--c-gray-100);background:#fff;color:var(--c-gray-800);padding:7px 12px;border-radius:8px;cursor:pointer;transition:.15s;}
+  button:hover{background:var(--c-gray-50);}
+  button.primary{background:var(--c-purple);color:#fff;border-color:var(--c-purple);}
+  button.primary:hover{background:var(--c-purple-800);}
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;}
+  @media(max-width:880px){.layout{grid-template-columns:1fr;}}
+  .flower-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;position:sticky;top:16px;}
+  .stats{display:flex;justify-content:space-around;margin-top:6px;gap:8px;}
+  .stat{font-size:12px;color:var(--c-gray-400);}
+  .stat b{display:block;font-size:22px;color:var(--c-gray-800);font-weight:600;line-height:1.2;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+  .dim{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;scroll-margin:80px;}
+  .dim.goal{border-top:3px solid var(--c-purple);}
+  .dim.rel{border-top:3px solid var(--c-teal);}
+  .dim-head{display:flex;align-items:center;justify-content:space-between;}
+  .dim-name{font-weight:600;font-size:15px;}
+  .badge{font-size:11px;padding:2px 8px;border-radius:20px;}
+  .badge.goal{background:var(--c-purple-50);color:var(--c-purple-800);}
+  .badge.rel{background:var(--c-teal-50);color:var(--c-teal-800);}
+  .score-row{display:flex;align-items:center;gap:10px;}
+  .score-num{font-size:24px;font-weight:600;min-width:40px;text-align:center;}
+  .goal .score-num{color:var(--c-purple-800);}
+  .rel .score-num{color:var(--c-teal-800);}
+  input[type=range]{flex:1;accent-color:var(--c-purple);}
+  .rel input[type=range]{accent-color:var(--c-teal);}
+  .target-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--c-gray-400);}
+  .target-row input{width:50px;padding:3px 6px;border:1px solid var(--c-gray-100);border-radius:6px;font-family:inherit;}
+  .things{display:flex;flex-direction:column;gap:5px;}
+  .things input{width:100%;padding:6px 8px;border:1px solid var(--c-gray-100);border-radius:7px;font-family:inherit;font-size:13px;background:var(--c-gray-50);}
+  .things input:focus{outline:none;border-color:var(--c-purple);background:#fff;}
+  .rel .things input:focus{border-color:var(--c-teal);}
+  .checkin{display:flex;gap:6px;}
+  .checkin input{flex:1;padding:6px 8px;border:1px solid var(--c-gray-100);border-radius:7px;font-family:inherit;font-size:12px;}
+  .ci-btn{background:var(--c-purple);color:#fff;border-color:var(--c-purple);padding:6px 12px;font-size:12px;white-space:nowrap;}
+  .ci-btn:hover{background:var(--c-purple-800);}
+  .rel .ci-btn{background:var(--c-teal);border-color:var(--c-teal);}
+  .rel .ci-btn:hover{background:var(--c-teal-800);}
+  .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--c-gray-400);}
+  .history{font-size:11px;color:var(--c-gray-400);border-top:1px dashed var(--c-gray-100);padding-top:6px;min-height:16px;word-break:break-all;}
+  .snap-section{margin-top:24px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;}
+  .snap-section h2{font-size:15px;margin:0 0 4px;}
+  .snap-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .snap{display:flex;align-items:center;gap:10px;font-size:13px;}
+  .snap .m{width:72px;color:var(--c-gray-600);flex:none;}
+  .snap .bar{flex:1;height:10px;background:var(--c-gray-50);border-radius:6px;overflow:hidden;}
+  .snap .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--c-teal),var(--c-purple));}
+  .snap .v{width:42px;text-align:right;color:var(--c-gray-600);flex:none;}
+  .empty{color:var(--c-gray-400);font-size:13px;margin-top:8px;}
+  .foot{margin-top:18px;font-size:11px;color:var(--c-gray-400);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>生命之花 · 打卡工作台</h1>
+      <div class="date" id="date"></div>
+    </div>
+    <div class="btns">
+      <button class="primary" id="snapBtn">保存本月快照</button>
+      <button id="exportBtn">导出</button>
+      <button id="importBtn">导入</button>
+      <button id="resetBtn">重置</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="flower-card">
+      <svg id="flower" viewBox="0 0 360 360" width="100%"></svg>
+      <div class="stats">
+        <div class="stat">绽放度<b id="avg">0</b></div>
+        <div class="stat">总打卡<b id="total">0</b></div>
+        <div class="stat">连续天数<b id="streak">0</b></div>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="snap-section">
+    <h2>月度绽放时间线</h2>
+    <div class="empty" id="snapEmpty">还没保存过快照。每月底点「保存本月快照」，看花慢慢开大。</div>
+    <div class="snap-list" id="snapList"></div>
+  </div>
+
+  <div class="foot">数据保存在本浏览器（localStorage），不会上传。建议每月导出一次 JSON 备份。</div>
+</div>
+
+<script>
+const DIMS=[
+ {key:'career', name:'职业发展', type:'goal', angle:-90},
+ {key:'finance', name:'财务', type:'goal', angle:-45},
+ {key:'growth',  name:'个人成长', type:'goal', angle:180},
+ {key:'self',    name:'自我实现', type:'goal', angle:225},
+ {key:'health',  name:'健康', type:'rel', angle:0},
+ {key:'leisure', name:'娱乐休闲', type:'rel', angle:45},
+ {key:'family',  name:'家庭', type:'rel', angle:90},
+ {key:'friends', name:'朋友重要他人', type:'rel', angle:135},
+];
+const KEY='lifeFlower_v1';
+const CX=180, CY=180, R=140;
+
+function defaultState(){
+  const s={scores:{}, targets:{}, things:{}, checkins:[], snapshots:[]};
+  DIMS.forEach(d=>{ s.scores[d.key]=5; s.targets[d.key]=8; s.things[d.key]=['','','']; });
+  return s;
+}
+function load(){
+  try{
+    const r=localStorage.getItem(KEY);
+    if(r){
+      const s=JSON.parse(r);
+      const d=defaultState();
+      return Object.assign(d, s, {
+        scores:Object.assign(d.scores, s.scores||{}),
+        targets:Object.assign(d.targets, s.targets||{}),
+        things:Object.assign(d.things, s.things||{}),
+        checkins:s.checkins||[],
+        snapshots:s.snapshots||[]
+      });
+    }
+  }catch(e){}
+  return defaultState();
+}
+let state=load();
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function today(){ const d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function thisMonth(){ const d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1); }
+function fmtDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function wedge(angle, rf){
+  const a1=(angle-22.5)*Math.PI/180, a2=(angle+22.5)*Math.PI/180;
+  const x1=(CX+rf*Math.cos(a1)).toFixed(1), y1=(CY+rf*Math.sin(a1)).toFixed(1);
+  const x2=(CX+rf*Math.cos(a2)).toFixed(1), y2=(CY+rf*Math.sin(a2)).toFixed(1);
+  return `M ${CX},${CY} L ${x1},${y1} A ${rf},${rf} 0 0 1 ${x2},${y2} Z`;
+}
+function drawFlower(){
+  const svg=document.getElementById('flower');
+  let html='';
+  DIMS.forEach(d=>{
+    const col=d.type==='goal'?'#EEEDFE':'#E1F5EE';
+    html+=`<path d="${wedge(d.angle,R)}" fill="${col}" stroke="#cfcdc4" stroke-width="0.5"/>`;
+  });
+  DIMS.forEach(d=>{
+    const sc=state.scores[d.key]||0;
+    const rf=sc/10*R;
+    if(rf>0.5){
+      const col=d.type==='goal'?'rgba(127,119,221,0.55)':'rgba(29,158,117,0.5)';
+      html+=`<path d="${wedge(d.angle,rf)}" fill="${col}"/>`;
+    }
+  });
+  html+=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#5F5E5A" stroke-width="0.8"/>`;
+  html+=`<circle cx="${CX}" cy="${CY}" r="34" fill="#fff" stroke="#5F5E5A" stroke-width="0.8"/>`;
+  html+=`<text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="600" fill="#26215C">生命之花</text>`;
+  DIMS.forEach(d=>{
+    const a=d.angle*Math.PI/180, lr=R+16;
+    const x=(CX+lr*Math.cos(a)).toFixed(1), y=(CY+lr*Math.sin(a)).toFixed(1);
+    const col=d.type==='goal'?'#3C3489':'#085041';
+    let anchor='middle';
+    if(Math.cos(a)>0.3) anchor='end';
+    else if(Math.cos(a)<-0.3) anchor='start';
+    html+=`<text x="${x}" y="${y}" text-anchor="${anchor}" dominant-baseline="central" font-size="12" font-weight="500" fill="${col}" style="cursor:pointer" onclick="focusDim('${d.key}')">${d.name}</text>`;
+  });
+  svg.innerHTML=html;
+}
+
+function calcStreak(key){
+  const days=[...new Set(state.checkins.filter(c=>c.dim===key).map(c=>c.date))].sort().reverse();
+  if(!days.length) return 0;
+  let cur=new Date();
+  if(!days.includes(fmtDate(cur))){
+    cur.setDate(cur.getDate()-1);
+    if(!days.includes(fmtDate(cur))) return 0;
+  }
+  let s=0;
+  while(days.includes(fmtDate(cur))){ s++; cur.setDate(cur.getDate()-1); }
+  return s;
+}
+function overallStreak(){
+  const days=[...new Set(state.checkins.map(c=>c.date))].sort().reverse();
+  if(!days.length) return 0;
+  let cur=new Date();
+  if(!days.includes(fmtDate(cur))){
+    cur.setDate(cur.getDate()-1);
+    if(!days.includes(fmtDate(cur))) return 0;
+  }
+  let s=0;
+  while(days.includes(fmtDate(cur))){ s++; cur.setDate(cur.getDate()-1); }
+  return s;
+}
+
+function renderCards(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML=DIMS.map(d=>{
+    const sc=state.scores[d.key], tg=state.targets[d.key], th=state.things[d.key];
+    const cis=state.checkins.filter(c=>c.dim===d.key);
+    const last=cis[0];
+    const streak=calcStreak(d.key);
+    const hist=cis.slice(0,3).map(c=>'· '+c.date+(c.note?'：'+esc(c.note):'')).join('<br>')||'暂无记录';
+    return `<div class="dim ${d.type}" data-key="${d.key}">
+      <div class="dim-head"><span class="dim-name">${d.name}</span><span class="badge ${d.type}">${d.type==='goal'?'目标型':'关系型'}</span></div>
+      <div class="score-row">
+        <span class="score-num" id="sc-${d.key}">${sc}</span>
+        <input type="range" min="0" max="10" step="0.5" value="${sc}" data-key="${d.key}">
+      </div>
+      <div class="target-row">年度目标 <input type="number" min="0" max="10" step="0.5" value="${tg}" data-key="${d.key}" data-field="target"> 分</div>
+      <div class="things">
+        <input placeholder="① 今年最重要的事" value="${esc(th[0]||'')}" data-key="${d.key}" data-i="0">
+        <input placeholder="②" value="${esc(th[1]||'')}" data-key="${d.key}" data-i="1">
+        <input placeholder="③" value="${esc(th[2]||'')}" data-key="${d.key}" data-i="2">
+      </div>
+      <div class="checkin">
+        <input placeholder="今日打卡备注（可选）" id="note-${d.key}">
+        <button class="ci-btn" data-key="${d.key}">打卡</button>
+      </div>
+      <div class="meta"><span>连续 ${streak} 天</span><span>${last?('上次 '+last.date):'未打卡'}</span></div>
+      <div class="history" id="hist-${d.key}">${hist}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(){
+  const vals=DIMS.map(d=>state.scores[d.key]||0);
+  const avg=(vals.reduce((a,b)=>a+b,0)/8).toFixed(1);
+  document.getElementById('avg').textContent=avg;
+  document.getElementById('total').textContent=state.checkins.length;
+  document.getElementById('streak').textContent=overallStreak();
+}
+function renderSnaps(){
+  const list=document.getElementById('snapList');
+  const empty=document.getElementById('snapEmpty');
+  if(!state.snapshots.length){ empty.style.display='block'; list.innerHTML=''; return; }
+  empty.style.display='none';
+  const sorted=[...state.snapshots].sort((a,b)=>a.month<b.month?-1:1);
+  list.innerHTML=sorted.map(s=>`<div class="snap"><span class="m">${s.month}</span><span class="bar"><i style="width:${s.avg*10}%"></i></span><span class="v">${s.avg}</span></div>`).join('');
+}
+function focusDim(key){
+  const el=document.querySelector('.dim[data-key="'+key+'"]');
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function checkin(key){
+  const noteInput=document.getElementById('note-'+key);
+  const note=(noteInput.value||'').trim();
+  state.checkins.unshift({date:today(), dim:key, note:note});
+  save();
+  renderCards();
+  updateStats();
+}
+
+const grid=document.getElementById('grid');
+grid.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.type==='range'){
+    const k=t.dataset.key;
+    state.scores[k]=parseFloat(t.value);
+    document.getElementById('sc-'+k).textContent=t.value;
+    save(); drawFlower(); updateStats();
+  } else if(t.dataset.i!==undefined){
+    const k=t.dataset.key, i=+t.dataset.i;
+    state.things[k][i]=t.value;
+    save();
+  }
+});
+grid.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.type==='number'){
+    const k=t.dataset.key;
+    state.targets[k]=parseFloat(t.value)||0;
+    save(); drawFlower(); updateStats();
+  }
+});
+grid.addEventListener('click', e=>{
+  if(e.target.classList.contains('ci-btn')) checkin(e.target.dataset.key);
+});
+
+document.getElementById('snapBtn').onclick=()=>{
+  const m=thisMonth();
+  const avg=+(DIMS.reduce((a,d)=>a+state.scores[d.key],0)/8).toFixed(1);
+  const idx=state.snapshots.findIndex(s=>s.month===m);
+  if(idx>=0) state.snapshots[idx]={month:m, avg:avg};
+  else state.snapshots.push({month:m, avg:avg});
+  save(); renderSnaps();
+  alert('已保存 '+m+' 快照，本月绽放度 '+avg);
+};
+document.getElementById('exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='生命之花-'+today()+'.json';
+  a.click();
+};
+document.getElementById('importBtn').onclick=()=>{
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='.json,application/json';
+  inp.onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const s=JSON.parse(r.result); state=Object.assign(defaultState(), s); save(); init(); alert('导入成功'); }catch(err){ alert('文件格式错误'); } };
+    r.readAsText(f);
+  };
+  inp.click();
+};
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('确定清空所有数据？此操作不可撤销。')){ state=defaultState(); save(); init(); }
+};
+
+function init(){
+  document.getElementById('date').textContent='今天 '+today();
+  drawFlower();
+  renderCards();
+  updateStats();
+  renderSnaps();
+}
+init();
+</script>
+</body>
+</html>
